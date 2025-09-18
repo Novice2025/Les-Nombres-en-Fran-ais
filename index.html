@@ -1,0 +1,419 @@
+<!-- Chosen Palette: Dark Theme with Yellow Accent -->
+<!-- Application Structure Plan: The application is a single-page interactive lesson on French numbers. The structure is based on the logical categories from the source report: numbers 1-20, ordinals, key numbers (by tens), and specific examples. A sticky navigation bar allows users to jump between these sections. An interactive quiz is included at the end to provide a practical learning tool. This thematic, section-based approach with quick navigation is chosen for its clarity and ease of use, allowing learners to focus on specific number groups or progress linearly through the lesson. -->
+<!-- Visualization & Content Choices: The core content (French numbers, pronunciation) from the report is presented in structured HTML tables styled with Tailwind for clarity. The primary goal is learning and recall. To achieve this, two key interactions are implemented: 1) Click-to-pronounce: A speaker icon next to each number will use a text-to-speech API to provide audio pronunciation, enhancing the learning experience beyond the text guide. 2) Interactive Quiz: A JavaScript-powered quiz at the end tests user knowledge with fill-in-the-blank questions and immediate feedback, reinforcing the material. This combination of clear presentation and interactive practice directly supports the educational goal. No SVG/Mermaid used. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Les Nombres en Français - Um Guia Completo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #141414;
+            color: #f1f1f1;
+        }
+        .accent-color { color: #ffc700; }
+        .bg-accent { background-color: #ffc700; }
+        .border-accent { border-color: #ffc700; }
+        .table-header { background-color: rgba(255, 199, 0, 0.1); }
+        .content-block {
+            background-color: #1f1f1f;
+            border-left: 5px solid #ffc700;
+            transition: box-shadow 0.3s ease-in-out;
+        }
+        .content-block:hover {
+            box-shadow: 0 0 15px rgba(255, 199, 0, 0.4);
+        }
+        .pronounce-btn {
+            cursor: pointer;
+            transition: color 0.2s ease-in-out;
+        }
+        .pronounce-btn:hover {
+            color: #ffc700;
+        }
+        .quiz-input {
+            background-color: #333;
+            border: 2px solid #555;
+            color: #fff;
+            transition: border-color 0.3s;
+        }
+        .quiz-input:focus {
+            outline: none;
+            border-color: #ffc700;
+        }
+        .quiz-feedback.correct {
+            color: #22c55e;
+        }
+        .quiz-feedback.incorrect {
+            color: #ef4444;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #ffc700;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <header class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold accent-color mb-2">Les Nombres en Français</h1>
+        <h2 class="text-lg md:text-xl text-gray-400">Um Guia Completo com Pronúncia</h2>
+    </header>
+
+    <nav class="sticky top-0 bg-[#141414] bg-opacity-80 backdrop-blur-sm py-4 z-10 mb-12">
+        <ul class="flex flex-wrap justify-center gap-4 md:gap-6 text-sm md:text-base">
+            <li><a href="#numbers-1-20" class="hover:accent-color transition-colors">Números 1-20</a></li>
+            <li><a href="#ordinals" class="hover:accent-color transition-colors">Números Ordinais</a></li>
+            <li><a href="#key-numbers" class="hover:accent-color transition-colors">Dezenas e Milhares</a></li>
+            <li><a href="#specific-examples" class="hover:accent-color transition-colors">Exemplos</a></li>
+            <li><a href="#quiz" class="hover:accent-color transition-colors font-bold">Quiz Prático</a></li>
+        </ul>
+    </nav>
+
+    <main class="max-w-4xl mx-auto space-y-12">
+        
+        <section id="numbers-1-20" class="content-block p-6 rounded-lg">
+            <h3 class="text-2xl font-bold mb-4 accent-color">Categoria 1: Números de 1 a 20</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="table-header">
+                        <tr>
+                            <th class="p-3">Número</th>
+                            <th class="p-3">Francês</th>
+                            <th class="p-3">Pronúncia (Simplificada)</th>
+                            <th class="p-3">Ouvir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-700"><td>1</td><td>un</td><td>"ã"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="un"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>2</td><td>deux</td><td>"dø"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="deux"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>3</td><td>trois</td><td>"truá"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="trois"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>4</td><td>quatre</td><td>"kátr"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="quatre"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>5</td><td>cinq</td><td>"sãk"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="cinq"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>6</td><td>six</td><td>"sís"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="six"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>7</td><td>sept</td><td>"sét"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="sept"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>8</td><td>huit</td><td>"uít"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="huit"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>9</td><td>neuf</td><td>"nãf"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="neuf"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>10</td><td>dix</td><td>"dís"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="dix"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>11</td><td>onze</td><td>"õz"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="onze"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>12</td><td>douze</td><td>"dúz"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="douze"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>13</td><td>treize</td><td>"tréz"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="treize"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>14</td><td>quatorze</td><td>"katórz"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="quatorze"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>15</td><td>quinze</td><td>"kãz"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="quinze"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>16</td><td>seize</td><td>"séz"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="seize"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>17</td><td>dix-sept</td><td>"dis-sét"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="dix-sept"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>18</td><td>dix-huit</td><td>"diz-uít"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="dix-huit"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>19</td><td>dix-neuf</td><td>"diz-nãf"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="dix-neuf"></i></td></tr>
+                        <tr><td>20</td><td>vingt</td><td>"vã"</td><td><i class="fas fa-volume-up pronounce-btn" data-text="vingt"></i></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="ordinals" class="content-block p-6 rounded-lg">
+            <h3 class="text-2xl font-bold mb-4 accent-color">Números Ordinais (1º ao 20º)</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                     <thead class="table-header">
+                        <tr>
+                            <th class="p-3">Ordinal</th>
+                            <th class="p-3">Francês</th>
+                            <th class="p-3">Pronúncia (Simplificada)</th>
+                            <th class="p-3">Português</th>
+                            <th class="p-3">Ouvir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-700"><td>1º</td><td>premier/première</td><td>"premyê/premyér"</td><td>primeiro/primeira</td><td><i class="fas fa-volume-up pronounce-btn" data-text="premier"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>2º</td><td>deuxième</td><td>"dêzyèm"</td><td>segundo</td><td><i class="fas fa-volume-up pronounce-btn" data-text="deuxième"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>3º</td><td>troisième</td><td>"truázyèm"</td><td>terceiro</td><td><i class="fas fa-volume-up pronounce-btn" data-text="troisième"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>4º</td><td>quatrième</td><td>"katrièm"</td><td>quarto</td><td><i class="fas fa-volume-up pronounce-btn" data-text="quatrième"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>5º</td><td>cinquième</td><td>"sãkièm"</td><td>quinto</td><td><i class="fas fa-volume-up pronounce-btn" data-text="cinquième"></i></td></tr>
+                        <tr><td>20º</td><td>vingtième</td><td>"vãtyèm"</td><td>vigésimo</td><td><i class="fas fa-volume-up pronounce-btn" data-text="vingtième"></i></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="key-numbers" class="content-block p-6 rounded-lg">
+            <h3 class="text-2xl font-bold mb-4 accent-color">Categoria 2: Dezenas, Centenas e Milhares</h3>
+             <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="table-header">
+                        <tr>
+                            <th class="p-3">Número</th>
+                            <th class="p-3">Francês</th>
+                            <th class="p-3">Pronúncia (Simplificada)</th>
+                            <th class="p-3">Português</th>
+                            <th class="p-3">Ouvir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-700"><td>20</td><td>vingt</td><td>"vã"</td><td>vinte</td><td><i class="fas fa-volume-up pronounce-btn" data-text="vingt"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>30</td><td>trente</td><td>"trãt"</td><td>trinta</td><td><i class="fas fa-volume-up pronounce-btn" data-text="trente"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>40</td><td>quarante</td><td>"karãt"</td><td>quarenta</td><td><i class="fas fa-volume-up pronounce-btn" data-text="quarante"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>50</td><td>cinquante</td><td>"sãkãt"</td><td>cinquenta</td><td><i class="fas fa-volume-up pronounce-btn" data-text="cinquante"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>60</td><td>soixante</td><td>"suassãt"</td><td>sessenta</td><td><i class="fas fa-volume-up pronounce-btn" data-text="soixante"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>70</td><td>soixante-dix</td><td>"suassãt-dís"</td><td>setenta</td><td><i class="fas fa-volume-up pronounce-btn" data-text="soixante-dix"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>80</td><td>quatre-vingts</td><td>"kátr-vã"</td><td>oitenta</td><td><i class="fas fa-volume-up pronounce-btn" data-text="quatre-vingts"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>90</td><td>quatre-vingt-dix</td><td>"kátr-vã-dís"</td><td>noventa</td><td><i class="fas fa-volume-up pronounce-btn" data-text="quatre-vingt-dix"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>100</td><td>cent</td><td>"sã"</td><td>cem</td><td><i class="fas fa-volume-up pronounce-btn" data-text="cent"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>1,000</td><td>mille</td><td>"míl"</td><td>mil</td><td><i class="fas fa-volume-up pronounce-btn" data-text="mille"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>1,000,000</td><td>un million</td><td>"ã mílyõ"</td><td>um milhão</td><td><i class="fas fa-volume-up pronounce-btn" data-text="un million"></i></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="specific-examples" class="content-block p-6 rounded-lg">
+            <h3 class="text-2xl font-bold mb-4 accent-color">Categoria 3: Exemplos Específicos</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="table-header">
+                        <tr>
+                            <th class="p-3">Número</th>
+                            <th class="p-3">Francês</th>
+                            <th class="p-3">Pronúncia (Simplificada)</th>
+                            <th class="p-3">Português</th>
+                            <th class="p-3">Ouvir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-gray-700"><td>21</td><td>vingt et un</td><td>"vãt-ê-ã"</td><td>vinte e um</td><td><i class="fas fa-volume-up pronounce-btn" data-text="vingt et un"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>30</td><td>trente</td><td>"trãt"</td><td>trinta</td><td><i class="fas fa-volume-up pronounce-btn" data-text="trente"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>42</td><td>quarante-deux</td><td>"karãt-dê"</td><td>quarenta e dois</td><td><i class="fas fa-volume-up pronounce-btn" data-text="quarante-deux"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>51</td><td>cinquante et un</td><td>"sãkãt-ê-ã"</td><td>cinquenta e um</td><td><i class="fas fa-volume-up pronounce-btn" data-text="cinquante et un"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>63</td><td>soixante-trois</td><td>"suassãt-truá"</td><td>sessenta e três</td><td><i class="fas fa-volume-up pronounce-btn" data-text="soixante-trois"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>74</td><td>soixante-quatorze</td><td>"suassãt-katórz"</td><td>setenta e quatro</td><td><i class="fas fa-volume-up pronounce-btn" data-text="soixante-quatorze"></i></td></tr>
+                        <tr class="border-b border-gray-700"><td>86</td><td>quatre-vingt-six</td><td>"kátr-vã-sís"</td><td>oitenta e seis</td><td><i class="fas fa-volume-up pronounce-btn" data-text="quatre-vingt-six"></i></td></tr>
+                        <tr><td>99</td><td>quatre-vingt-dix-neuf</td><td>"kátr-vã-diz-nãf"</td><td>noventa e nove</td><td><i class="fas fa-volume-up pronounce-btn" data-text="quatre-vingt-dix-neuf"></i></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="quiz" class="content-block p-6 rounded-lg">
+            <h3 class="text-2xl font-bold mb-4 accent-color">Quiz Prático</h3>
+            <p class="mb-6 text-gray-300">Teste seus conhecimentos! Escreva o número em francês.</p>
+            <div id="quiz-container" class="space-y-4">
+                <div id="question-container">
+                    <p class="text-2xl font-bold text-center" id="quiz-number"></p>
+                </div>
+                <input type="text" id="quiz-answer" class="w-full p-3 rounded-md quiz-input text-center text-lg" placeholder="Sua resposta em francês...">
+                <button id="check-answer" class="w-full p-3 bg-accent text-black font-bold rounded-md hover:bg-yellow-400 transition-colors">Verificar</button>
+                 <div id="quiz-feedback" class="text-center font-bold mt-2 h-6"></div>
+            </div>
+            <div class="text-center mt-4">
+                <button id="next-question" class="text-gray-400 hover:accent-color transition-colors hidden">Próxima Pergunta &rarr;</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const pronounceButtons = document.querySelectorAll('.pronounce-btn');
+            pronounceButtons.forEach(button => {
+                button.addEventListener('click', () => playAudio(button.getAttribute('data-text'), button));
+            });
+
+            const quizData = [
+                { number: 3, answer: "trois" },
+                { number: 15, answer: "quinze" },
+                { number: 21, answer: "vingt et un" },
+                { number: 40, answer: "quarante" },
+                { number: 74, answer: "soixante-quatorze" },
+                { number: 86, answer: "quatre-vingt-six" },
+                { number: 99, answer: "quatre-vingt-dix-neuf" },
+                { number: 100, answer: "cent" },
+            ];
+
+            let currentQuestionIndex = 0;
+
+            const quizNumberEl = document.getElementById('quiz-number');
+            const quizAnswerEl = document.getElementById('quiz-answer');
+            const checkAnswerBtn = document.getElementById('check-answer');
+            const nextQuestionBtn = document.getElementById('next-question');
+            const quizFeedbackEl = document.getElementById('quiz-feedback');
+
+            function loadQuestion() {
+                if(currentQuestionIndex >= quizData.length) {
+                    quizNumberEl.textContent = "Parabéns!";
+                    quizAnswerEl.value = "Você completou o quiz!";
+                    quizAnswerEl.disabled = true;
+                    checkAnswerBtn.style.display = 'none';
+                    nextQuestionBtn.style.display = 'none';
+                    quizFeedbackEl.textContent = '';
+                    return;
+                }
+                
+                quizNumberEl.textContent = `Qual é o número ${quizData[currentQuestionIndex].number}?`;
+                quizAnswerEl.value = '';
+                quizAnswerEl.disabled = false;
+                checkAnswerBtn.style.display = 'block';
+                nextQuestionBtn.style.display = 'none';
+                quizFeedbackEl.textContent = '';
+            }
+
+            function checkAnswer() {
+                const userAnswer = quizAnswerEl.value.trim().toLowerCase();
+                const correctAnswer = quizData[currentQuestionIndex].answer.toLowerCase();
+
+                if (userAnswer === correctAnswer) {
+                    quizFeedbackEl.textContent = "Correto!";
+                    quizFeedbackEl.className = 'quiz-feedback correct';
+                } else {
+                    quizFeedbackEl.textContent = `Incorreto. A resposta é "${quizData[currentQuestionIndex].answer}".`;
+                    quizFeedbackEl.className = 'quiz-feedback incorrect';
+                }
+                
+                quizAnswerEl.disabled = true;
+                checkAnswerBtn.style.display = 'none';
+                nextQuestionBtn.style.display = 'block';
+            }
+
+            checkAnswerBtn.addEventListener('click', checkAnswer);
+            quizAnswerEl.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkAnswer();
+                }
+            });
+            
+            nextQuestionBtn.addEventListener('click', () => {
+                currentQuestionIndex++;
+                loadQuestion();
+            });
+
+            loadQuestion();
+
+            async function playAudio(text, button) {
+                const originalButtonContent = button.innerHTML;
+                button.innerHTML = '<div class="spinner mx-auto"></div>';
+                button.disabled = true;
+                let retries = 0;
+                const maxRetries = 3;
+
+                try {
+                    while (retries < maxRetries) {
+                        try {
+                            const payload = {
+                                contents: [{ parts: [{ text: text }] }],
+                                generationConfig: {
+                                    responseModalities: ["AUDIO"],
+                                    speechConfig: {
+                                        voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } }
+                                    }
+                                },
+                                model: "gemini-2.5-flash-preview-tts"
+                            };
+                            const apiKey = "";
+                            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+
+                            const response = await fetch(apiUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+
+                            if (!response.ok) {
+                                throw new Error(`API error: ${response.statusText}`);
+                            }
+
+                            const result = await response.json();
+                            const part = result?.candidates?.[0]?.content?.parts?.[0];
+                            const audioData = part?.inlineData?.data;
+                            const mimeType = part?.inlineData?.mimeType;
+
+                            if (!audioData || !mimeType || !mimeType.startsWith("audio/")) {
+                                throw new Error("Invalid audio data from API.");
+                            }
+
+                            const match = mimeType.match(/rate=(\d+)/);
+                            const sampleRate = match ? parseInt(match[1], 10) : 16000;
+
+                            const pcmData = base64ToArrayBuffer(audioData);
+                            const pcm16 = new Int16Array(pcmData);
+                            const wavBlob = pcmToWav(pcm16, sampleRate);
+                            const audioUrl = URL.createObjectURL(wavBlob);
+                            const audio = new Audio(audioUrl);
+                            audio.play();
+                            audio.onended = () => URL.revokeObjectURL(audioUrl);
+                            return;
+                        } catch (error) {
+                            console.error("Tentativa de áudio falhou:", error);
+                            retries++;
+                            if (retries < maxRetries) {
+                                await new Promise(res => setTimeout(res, 1000 * Math.pow(2, retries)));
+                            } else {
+                                alert("Não foi possível carregar a pronúncia. Por favor, tente novamente mais tarde.");
+                            }
+                        }
+                    }
+                } finally {
+                    button.innerHTML = originalButtonContent;
+                    button.disabled = false;
+                }
+            }
+
+            function base64ToArrayBuffer(base64) {
+                const binaryString = window.atob(base64);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                return bytes.buffer;
+            }
+
+            function pcmToWav(pcmData, sampleRate) {
+                const numChannels = 1;
+                const bitDepth = 16;
+                const pcmLength = pcmData.length * (bitDepth / 8);
+                const buffer = new ArrayBuffer(44 + pcmLength);
+                const view = new DataView(buffer);
+                let offset = 0;
+
+                function writeString(str) {
+                    for (let i = 0; i < str.length; i++) {
+                        view.setUint8(offset++, str.charCodeAt(i));
+                    }
+                }
+
+                writeString('RIFF');
+                view.setUint32(offset, 36 + pcmLength, true); offset += 4;
+                writeString('WAVE');
+                writeString('fmt ');
+                view.setUint32(offset, 16, true); offset += 4;
+                view.setUint16(offset, 1, true); offset += 2;
+                view.setUint16(offset, numChannels, true); offset += 2;
+                view.setUint32(offset, sampleRate, true); offset += 4;
+                view.setUint32(offset, sampleRate * numChannels * (bitDepth / 8), true); offset += 4;
+                view.setUint16(offset, numChannels * (bitDepth / 8), true); offset += 2;
+                view.setUint16(offset, bitDepth, true); offset += 2;
+                writeString('data');
+                view.setUint32(offset, pcmLength, true); offset += 4;
+
+                for (let i = 0; i < pcmData.length; i++, offset += 2) {
+                    view.setInt16(offset, pcmData[i], true);
+                }
+
+                return new Blob([view], { type: 'audio/wav' });
+            }
+        });
+    </script>
+</body>
+</html>
